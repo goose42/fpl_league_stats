@@ -13,8 +13,12 @@ A desktop application built with Electron to track and analyze Fantasy Premier L
 - Real-time data updates
 
 ## Screenshots
-
-[Coming soon]
+![Main Window](screenshots/main_window.png)
+![League Table](screenshots/league_table.png)
+![Player Ownership](screenshots/player_ownership.png)
+![Captain Choices](screenshots/captain_choices.png)
+![Transfer Activity](screenshots/transfer_activity.png)
+![Team_lineup](screenshots/team_lineup.png)
 
 ## Prerequisites
 
