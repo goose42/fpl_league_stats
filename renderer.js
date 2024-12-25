@@ -345,6 +345,7 @@ class FPLLeague {
                 this.showTeamDetails(row.getData());
             });
 
+            this.showStatus('Fetching league player picks...');
             const stats = await this.collectLeagueStats(standings);
             this.displayStats(stats);
 
@@ -547,4 +548,37 @@ class FPLLeague {
 
 document.addEventListener('DOMContentLoaded', () => {
     new FPLLeague();
+});
+
+// Add event listener for the clear history button
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+    const confirmation = confirm('Are you sure you want to clear all league history?');
+    
+    if (confirmation) {
+        // Clear localStorage
+        localStorage.removeItem('leagues');
+        
+        // Reset the leagues array
+        leagues = [];
+        
+        // Clear the table
+        if (leagueTable) {
+            leagueTable.clearData();
+        }
+        
+        // Clear the league container
+        const leagueContainer = document.getElementById('leagueContainer');
+        if (leagueContainer) {
+            leagueContainer.innerHTML = '';
+        }
+
+        // If you have a league select dropdown, clear it too
+        const leagueSelect = document.getElementById('leagueSelect');
+        if (leagueSelect) {
+            leagueSelect.innerHTML = '<option value="">Select a league</option>';
+        }
+
+        // Force a page refresh to ensure everything is reset
+        location.reload();
+    }
 }); 

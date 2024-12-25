@@ -4,11 +4,34 @@
   "description": "Fantasy Premier League League Tracker",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder build --mac --win --linux",
+    "build:mac": "electron-builder build --mac",
+    "build:win": "electron-builder build --win",
+    "build:linux": "electron-builder build --linux"
   },
   "dependencies": {
-    "electron": "^28.0.0",
     "axios": "^1.6.2",
     "tabulator-tables": "^5.5.2"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.yourname.fpl-league-tracker",
+    "productName": "FPL League Tracker",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.sports"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"]
+    }
   }
 } 

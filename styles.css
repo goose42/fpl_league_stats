@@ -293,4 +293,21 @@ h1 {
 
 #standings-table .tabulator-row:hover {
     background-color: #e9ecef !important;
+}
+
+.button-container {
+    margin: 10px 0;
+}
+
+#clearHistoryBtn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#clearHistoryBtn:hover {
+    background-color: #c82333;
 } 
