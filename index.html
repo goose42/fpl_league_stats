@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FPL League Tracker</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://fantasy.premierleague.com https://unpkg.com; script-src 'self' https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://unpkg.com 'unsafe-inline';">
+    <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div id="league-input-container">
+            <h2>Enter League ID</h2>
+            <div class="input-group">
+                <input type="number" id="league-id" placeholder="Enter league ID..." min="1">
+                <button id="submit-league" class="submit-button">Load League</button>
+            </div>
+            <div id="league-history" class="league-history">
+                <h3>Recent Leagues</h3>
+                <div id="league-history-list"></div>
+            </div>
+        </div>
+        <div id="main-content" style="display: none;">
+            <div class="header">
+                <div class="header-left">
+                    <h1>FPL League Tracker</h1>
+                    <span id="league-id-display"></span>
+                </div>
+                <div class="header-buttons">
+                    <button id="change-league-btn" class="change-league-button">
+                        Change League
+                    </button>
+                    <button id="reload-btn" class="reload-button">
+                        <span class="reload-icon">↻</span> Reload Data
+                    </button>
+                </div>
+            </div>
+            <div id="status-bar" class="status-bar"></div>
+            <div id="league-view">
+                <div id="standings-table"></div>
+                <div id="ownership-table"></div>
+                <div id="captains-table"></div>
+                <div id="transfers-in-table"></div>
+                <div id="transfers-out-table"></div>
+            </div>
+            <div id="team-view" style="display: none;">
+                <button id="back-to-league" class="back-button">
+                    ← Back to League
+                </button>
+                <div class="team-header">
+                    <h2 id="team-name"></h2>
+                    <h3 id="manager-name"></h3>
+                </div>
+                <div id="team-picks-table"></div>
+                <div id="team-transfers-table"></div>
+            </div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html> 

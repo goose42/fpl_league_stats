@@ -1,0 +1,296 @@
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.tabulator {
+    margin: 20px 0;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+.tabulator-header {
+    background-color: #3498db !important;
+    color: white !important;
+}
+
+.tabulator-col {
+    background-color: #3498db !important;
+    color: white !important;
+}
+
+.tabulator-row:nth-child(even) {
+    background-color: #f8f9fa !important;
+}
+
+.tabulator-row:hover {
+    background-color: #e9ecef !important;
+}
+
+h1 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+#standings-table,
+#ownership-table,
+#captains-table,
+#transfers-in-table,
+#transfers-out-table {
+    margin-bottom: 30px;
+}
+
+.reload-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s;
+}
+
+.reload-button:hover {
+    background-color: #2980b9;
+}
+
+.reload-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.reload-icon {
+    font-size: 18px;
+}
+
+.status-bar {
+    background-color: #f8f9fa;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: none;
+}
+
+.status-bar.active {
+    display: block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Add titles to tables */
+#standings-table::before,
+#ownership-table::before,
+#captains-table::before,
+#transfers-in-table::before,
+#transfers-out-table::before {
+    content: attr(data-title);
+    display: block;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 20px 0 10px;
+    color: #2c3e50;
+}
+
+#standings-table::before { content: "League Standings"; }
+#ownership-table::before { content: "Player Ownership"; }
+#captains-table::before { content: "Captain Choices"; }
+#transfers-in-table::before { content: "Transfers In"; }
+#transfers-out-table::before { content: "Transfers Out"; }
+
+#league-input-container {
+    text-align: center;
+    margin: 100px auto;
+    max-width: 400px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#league-id {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #3498db;
+    border-radius: 4px;
+    outline: none;
+}
+
+#league-id:focus {
+    border-color: #2980b9;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #2980b9;
+}
+
+.submit-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+#league-id-display {
+    color: #666;
+    font-size: 16px;
+}
+
+.change-league-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.change-league-button:hover {
+    background-color: #7f8c8d;
+}
+
+/* Add these styles */
+.league-history {
+    margin-top: 30px;
+    text-align: left;
+}
+
+.league-history h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.league-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    margin: 5px 0;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.league-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.delete-league {
+    background: none;
+    border: none;
+    color: #95a5a6;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s;
+}
+
+.delete-league:hover {
+    color: #e74c3c;
+}
+
+.league-history-item:hover {
+    background-color: #e9ecef;
+}
+
+.league-history-item .league-id {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.league-history-item .league-name {
+    color: #666;
+    flex-grow: 1;
+}
+
+.no-history {
+    color: #666;
+    font-style: italic;
+}
+
+.back-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-button:hover {
+    background-color: #7f8c8d;
+}
+
+.team-header {
+    margin-bottom: 20px;
+}
+
+.team-header h2 {
+    color: #2c3e50;
+    margin: 0;
+}
+
+.team-header h3 {
+    color: #666;
+    margin: 5px 0 0 0;
+}
+
+#standings-table .tabulator-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#standings-table .tabulator-row:hover {
+    background-color: #e9ecef !important;
+} 

@@ -1,0 +1,14 @@
+{
+  "name": "fpl-league-tracker",
+  "version": "1.0.0",
+  "description": "Fantasy Premier League League Tracker",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^28.0.0",
+    "axios": "^1.6.2",
+    "tabulator-tables": "^5.5.2"
+  }
+} 
