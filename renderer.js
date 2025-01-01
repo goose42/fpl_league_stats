@@ -6,7 +6,7 @@ class FPLLeague {
         this.LEAGUE_URL_TEMPLATE = "https://fantasy.premierleague.com/api/leagues-classic/{}/standings/";
         this.PICKS_URL_TEMPLATE = "https://fantasy.premierleague.com/api/entry/{}/event/{}/picks/";
         this.TRANSFERS_URL_TEMPLATE = "https://fantasy.premierleague.com/api/entry/{}/transfers/";
-        
+        this.PLAYER_URL_TEMPLATE = "https://fantasy.premierleague.com/api/element-summary/{}/";
         // Add league history
         this.leagueHistory = this.loadLeagueHistory();
         
@@ -17,6 +17,7 @@ class FPLLeague {
         
         this.setupLeagueInput();
         this.displayLeagueHistory();
+        this.setupPlayerModal();
     }
 
     loadLeagueHistory() {
@@ -369,16 +370,26 @@ class FPLLeague {
             document.getElementById('team-name').textContent = teamData.entry_name;
             document.getElementById('manager-name').textContent = `Manager: ${teamData.player_name}`;
             
-            // Get team picks
-            const teamDetails = await this.getTeamPicks(teamData.entry);
+            // Get team picks and league ownership data
+            const [teamDetails, leagueStats] = await Promise.all([
+                this.getTeamPicks(teamData.entry),
+                this.getLeagueOwnershipStats()
+            ]);
             
             if (!teamDetails) {
                 throw new Error('Failed to load team details');
             }
 
-            // Display picks
-            new Tabulator("#team-picks-table", {
-                data: teamDetails.picks,
+            // Add ownership percentage to each pick
+            const picksWithOwnership = teamDetails.picks.map(pick => ({
+                ...pick,
+                ownership: leagueStats.playerCounts[pick.player] || '0',
+                element: pick.element
+            }));
+
+            // Display picks with ownership
+            const picksTable = new Tabulator("#team-picks-table", {
+                data: picksWithOwnership,
                 layout: "fitColumns",
                 columns: [
                     { title: "Position", field: "position" },
@@ -392,8 +403,19 @@ class FPLLeague {
                             if (data.isViceCaptain) return "Vice Captain";
                             return "";
                         }
-                    }
+                    },
+                    { title: "League Ownership", field: "ownership" }
                 ]
+            });
+
+            // Add row click event after table is initialized
+            picksTable.on("rowClick", (e, row) => {
+                const rowData = row.getData();
+                if (!rowData.element) {
+                    console.error('No element ID found for player:', rowData.player);
+                    return;
+                }
+                this.showPlayerDetails(rowData);
             });
 
             // Display transfers if any
@@ -467,40 +489,57 @@ class FPLLeague {
 
     displayStats(stats) {
         // Display ownership stats
-        new Tabulator("#ownership-table", {
+        const ownershipTable = new Tabulator("#ownership-table", {
             data: Object.entries(stats.playerCounts).map(([player, count]) => ({
                 player,
-                percentage: ((count / stats.totalTeams) * 100).toFixed(1) + '%'
+                percentage: ((count / stats.totalTeams) * 100).toFixed(1) + '%',
+                element: this.getPlayerElementId(player)
             })),
             layout: "fitColumns",
             headerSort: true,
             title: "Player Ownership",
-            initialSort: [
-                {column: "percentage", dir: "desc"}
-            ],
+            initialSort: [{column: "percentage", dir: "desc"}],
             columns: [
                 { title: "Player", field: "player", sorter: "string" },
                 { title: "Ownership %", field: "percentage", sorter: "number" }
             ]
         });
 
+        ownershipTable.on("rowClick", (e, row) => {
+            const rowData = row.getData();
+            if (!rowData.element) {
+                console.error('No element ID found for player:', rowData.player);
+                return;
+            }
+            this.showPlayerDetails(rowData);
+        });
+
         // Display captain stats
-        new Tabulator("#captains-table", {
+        const captainsTable = new Tabulator("#captains-table", {
             data: Object.entries(stats.captainCounts).map(([player, count]) => ({
                 player,
-                percentage: ((count / stats.totalTeams) * 100).toFixed(1) + '%'
+                percentage: ((count / stats.totalTeams) * 100).toFixed(1) + '%',
+                element: this.getPlayerElementId(player)
             })),
             layout: "fitColumns",
             headerSort: true,
             title: "Captain Choices",
-            initialSort: [
-                {column: "count", dir: "desc"}
-            ],
+            initialSort: [{column: "percentage", dir: "desc"}],
             columns: [
                 { title: "Player", field: "player", sorter: "string" },
                 { title: "Times Captained %", field: "percentage", sorter: "number" }
             ]
         });
+
+        captainsTable.on("rowClick", (e, row) => {
+            const rowData = row.getData();
+            if (!rowData.element) {
+                console.error('No element ID found for player:', rowData.player);
+                return;
+            }
+            this.showPlayerDetails(rowData);
+        });
+
         // Display transfers in table
         const transfersInData = Object.entries(stats.transfersInCounts).map(([player, count]) => ({
             player,
@@ -543,6 +582,181 @@ class FPLLeague {
         this.leagueHistory = this.leagueHistory.filter(l => l.id !== leagueId);
         this.saveLeagueHistory();
         this.displayLeagueHistory();
+    }
+
+    async getLeagueOwnershipStats() {
+        try {
+            const response = await axios.get(this.LEAGUE_URL);
+            const standings = response.data.standings.results;
+            
+            const playerCounts = {};
+            let totalTeams = standings.length;
+
+            for (const entry of standings) {
+                const teamData = await this.getTeamPicks(entry.entry);
+                if (!teamData) continue;
+
+                teamData.picks.forEach(pick => {
+                    const playerName = pick.player;
+                    playerCounts[playerName] = (playerCounts[playerName] || 0) + 1;
+                });
+            }
+
+            return {
+                playerCounts,
+                totalTeams
+            };
+        } catch (error) {
+            console.error('Error getting league ownership stats:', error);
+            return { playerCounts: {}, totalTeams: 0 };
+        }
+    }
+
+    setupPlayerModal() {
+        const modal = document.getElementById('player-modal');
+        const closeBtn = modal.querySelector('.close-modal');
+        
+        closeBtn.onclick = () => {
+            modal.style.display = "none";
+        };
+        
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    }
+
+    async showPlayerDetails(playerData) {
+        const modal = document.getElementById('player-modal');
+        const playerName = document.getElementById('modal-player-name');
+        
+        modal.style.display = "block";
+        playerName.textContent = playerData.player;
+        
+        this.showStatus('Loading player details...');
+        
+        try {
+            const [fixtures, owners] = await Promise.all([
+                this.getPlayerFixtures(playerData.element),
+                this.getPlayerOwners(playerData.player)
+            ]);
+            
+            // Show fixtures
+            new Tabulator("#player-fixtures-table", {
+                data: fixtures,
+                layout: "fitColumns",
+                columns: [
+                    { 
+                        title: "GW", 
+                        field: "event" 
+                    },
+                    { 
+                        title: "Fixture", 
+                        field: "fixture",
+                        formatter: (cell) => {
+                            const data = cell.getRow().getData();
+                            return data.isHome ? 
+                                `${data.team} vs ${data.opponent}` :
+                                `${data.opponent} vs ${data.team}`;
+                        }
+                    },
+                    { 
+                        title: "Difficulty", 
+                        field: "difficulty",
+                        formatter: (cell) => {
+                            const diff = cell.getValue();
+                            return `<span class="difficulty-${diff}">${diff}</span>`;
+                        }
+                    }
+                ]
+            });
+            
+            // Show owners
+            new Tabulator("#player-owners-table", {
+                data: owners,
+                layout: "fitColumns",
+                columns: [
+                    { title: "Position", field: "rank" },
+                    { title: "Team", field: "entry_name" },
+                    { title: "Manager", field: "player_name" }
+                ]
+            });
+            
+            this.showStatus('Player details loaded', 3000);
+        } catch (error) {
+            console.error('Error loading player details:', error);
+            this.showStatus('Error loading player details', 3000);
+        }
+    }
+
+    async getPlayerFixtures(playerId) {
+        try {
+            // Fetch fixtures directly from player endpoint
+            const response = await axios.get(this.PLAYER_URL_TEMPLATE.replace('{}', playerId));
+            const playerData = response.data;
+            
+            if (!playerData.fixtures || !playerData.fixtures.length) {
+                console.error('No fixtures found for player:', playerId);
+                return [];
+            }
+
+            const fixtures = playerData.fixtures
+                .filter(f => f.event) // Filter out fixtures without gameweek
+                .slice(0, 5)  // Next 5 fixtures
+                .map(fixture => {
+                    const isHome = fixture.is_home;
+                    const team = this.bootstrapData.teams.find(t => t.id === (isHome ? fixture.team_h : fixture.team_a));
+                    const opponent = this.bootstrapData.teams.find(t => t.id === (isHome ? fixture.team_a : fixture.team_h));
+
+                    return {
+                        event: fixture.event,
+                        team: team?.short_name || 'Unknown',
+                        opponent: opponent?.short_name || 'Unknown',
+                        isHome: fixture.is_home,
+                        difficulty: fixture.difficulty
+                    };
+                });
+
+            return fixtures;
+
+        } catch (error) {
+            console.error('Error fetching player fixtures:', error);
+            return [];
+        }
+    }
+
+    async getPlayerOwners(playerName) {
+        try {
+            const response = await axios.get(this.LEAGUE_URL);
+            const standings = response.data.standings.results;
+            const owners = [];
+            
+            for (const entry of standings) {
+                const teamData = await this.getTeamPicks(entry.entry);
+                if (!teamData) continue;
+                
+                if (teamData.picks.some(pick => pick.player === playerName)) {
+                    owners.push({
+                        rank: entry.rank,
+                        entry_name: entry.entry_name,
+                        player_name: entry.player_name
+                    });
+                }
+            }
+            
+            return owners;
+        } catch (error) {
+            console.error('Error getting player owners:', error);
+            return [];
+        }
+    }
+
+    // Add this helper method to get player element ID
+    getPlayerElementId(playerName) {
+        if (!this.bootstrapData) return null;
+        const player = this.bootstrapData.elements.find(p => p.web_name === playerName);
+        return player ? player.id : null;
     }
 }
 

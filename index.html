@@ -8,6 +8,22 @@
     <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
 </head>
 <body>
+    <div id="player-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-player-name"></h2>
+            <div class="modal-sections">
+                <div class="fixtures-section">
+                    <h3>Upcoming Fixtures</h3>
+                    <div id="player-fixtures-table"></div>
+                </div>
+                <div class="owners-section">
+                    <h3>Owned By</h3>
+                    <div id="player-owners-table"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div id="league-input-container">
             <h2>Enter League ID</h2>
