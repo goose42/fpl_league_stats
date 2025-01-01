@@ -452,12 +452,17 @@ class FPLLeague {
         const viceCaptainCounts = {};
         const transfersInCounts = {};
         const transfersOutCounts = {};
+        const totalTeams = standings.length;
 
-        for (const entry of standings) {
+        for (let i = 0; i < standings.length; i++) {
+            const entry = standings[i];
+            // Update status with progress
+            this.showStatus(`Fetching team data (${i + 1}/${totalTeams})...`);
+            
             const teamData = await this.getTeamPicks(entry.entry);
             if (!teamData) continue;
 
-            // Process picks
+            // Process picks and transfers as before...
             teamData.picks.forEach(pick => {
                 const playerName = pick.player;
                 playerCounts[playerName] = (playerCounts[playerName] || 0) + 1;
@@ -470,7 +475,6 @@ class FPLLeague {
                 }
             });
 
-            // Process transfers
             teamData.transfers.forEach(transfer => {
                 transfersInCounts[transfer.playerIn] = (transfersInCounts[transfer.playerIn] || 0) + 1;
                 transfersOutCounts[transfer.playerOut] = (transfersOutCounts[transfer.playerOut] || 0) + 1;
@@ -483,7 +487,7 @@ class FPLLeague {
             viceCaptainCounts,
             transfersInCounts,
             transfersOutCounts,
-            totalTeams: standings.length
+            totalTeams
         };
     }
 
@@ -546,18 +550,28 @@ class FPLLeague {
             count
         }));
 
-        new Tabulator("#transfers-in-table", {
-            data: transfersInData,
+        const transfersInTable = new Tabulator("#transfers-in-table", {
+            data: transfersInData.map(data => ({
+                ...data,
+                element: this.getPlayerElementId(data.player)
+            })),
             layout: "fitColumns", 
             headerSort: true,
             title: "Transfers In",
-            initialSort: [
-                {column: "count", dir: "desc"}
-            ],
+            initialSort: [{column: "count", dir: "desc"}],
             columns: [
                 { title: "Player", field: "player", sorter: "string" },
                 { title: "Transfers In", field: "count", sorter: "number" }
             ]
+        });
+
+        transfersInTable.on("rowClick", (e, row) => {
+            const rowData = row.getData();
+            if (!rowData.element) {
+                console.error('No element ID found for player:', rowData.player);
+                return;
+            }
+            this.showPlayerDetails(rowData);
         });
 
         // Display transfers out table
@@ -566,15 +580,28 @@ class FPLLeague {
             count
         }));
 
-        new Tabulator("#transfers-out-table", {
-            data: transfersOutData,
+        const transfersOutTable = new Tabulator("#transfers-out-table", {
+            data: transfersOutData.map(data => ({
+                ...data,
+                element: this.getPlayerElementId(data.player)
+            })),
             layout: "fitColumns",
             headerSort: true, 
             title: "Transfers Out",
+            initialSort: [{column: "count", dir: "desc"}],
             columns: [
                 { title: "Player", field: "player", sorter: "string" },
                 { title: "Transfers Out", field: "count", sorter: "number" }
             ]
+        });
+
+        transfersOutTable.on("rowClick", (e, row) => {
+            const rowData = row.getData();
+            if (!rowData.element) {
+                console.error('No element ID found for player:', rowData.player);
+                return;
+            }
+            this.showPlayerDetails(rowData);
         });
     }
 
